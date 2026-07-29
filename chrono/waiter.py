@@ -28,6 +28,7 @@ async def wait_until(date=None, time=None, day_offset: int = 0, timezone=None):
     if delay <= 0:
         target = to_datetime(date=target.date(), time=target.time(),
                              day_offset=1, timezone=str(target.tzinfo))
+        delay = (target - datetime.now(target.tzinfo)).total_seconds()
 
     logger.info(f"Waiting until {target} ({delay:.1f}s).")
     await asyncio.sleep(delay)
