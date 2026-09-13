@@ -1,7 +1,7 @@
 # waiter.py
 import asyncio
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Literal
 
 from .time_parser import to_datetime
@@ -16,19 +16,24 @@ _UNITS = {
 }
 
 
-async def wait_until(date=None, time=None, day_offset: int = 0, timezone=None):
+async def wait_until(date=None, time=None, timezone=None):
     """Sleep until the given date and time.
 
-    Arguments match `to_datetime`. Returns immediately if the target
-    is already past.
+    Arguments match `to_datetime`. If `date` is omitted, only a time of
+    day is targeted: a time already past today rolls over to tomorrow.
+    If `date` is given explicitly and the resulting datetime is already
+    past, returns immediately without waiting.
     """
-    target = to_datetime(date=date, time=time, day_offset=day_offset, timezone=timezone)
+    target = to_datetime(date=date, time=time, timezone=timezone)
 
     delay = (target - datetime.now(target.tzinfo)).total_seconds()
     if delay <= 0:
-        target = to_datetime(date=target.date(), time=target.time(),
-                             day_offset=1, timezone=str(target.tzinfo))
-        delay = (target - datetime.now(target.tzinfo)).total_seconds()
+        if date is None:
+            target = target + timedelta(days=1)
+            delay = (target - datetime.now(target.tzinfo)).total_seconds()
+        else:
+            logger.info(f"{target} is in the past; not waiting.")
+            return
 
     logger.info(f"Waiting until {target} ({delay:.1f}s).")
     await asyncio.sleep(delay)
