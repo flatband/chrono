@@ -4,7 +4,6 @@
 import datetime as _dt
 from logging import getLogger
 from zoneinfo import ZoneInfo
-from shift_time import shift_time
 
 logger = getLogger(__name__)
 
@@ -39,7 +38,6 @@ def to_datetime(date=None, time=None, timezone=None):
     time = _parse_time(time, now)
 
     return _dt.datetime.combine(date, time, tzinfo=tz)
-
 
 def _parse_date(value, now):
     """Parse into a naive `date`."""
