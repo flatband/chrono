@@ -57,6 +57,25 @@ shift_time(now, 2, "h")     # 2 hours later
 
 Raises `ValueError` on an unknown unit or a fractional `"d"` amount, `TypeError` if `value` isn't a `datetime`.
 
+## `roundup(value, amount, unit)`
+
+Rounds a `datetime` or `time` up to the next multiple of `amount` `unit`. A value already on the grid is returned unchanged.
+
+```python
+import datetime as dt
+from chrono import roundup
+
+roundup(dt.time(10, 7), 15, "m")                  # 10:15
+roundup(dt.datetime(2026, 9, 13, 10, 7), 1, "h")  # 2026-09-13 11:00
+roundup(dt.datetime(2026, 9, 13, 10, 7), 24, "h") # 2026-09-14 00:00
+```
+
+`unit` is one of `"s"`, `"m"`, `"h"`. Steps count from the value's midnight in wall-clock time; a step that doesn't divide the day evenly stops at the next midnight, so `24, "h"` rounds up to the next midnight.
+
+A `time` raises `OverflowError` if the result would reach 24:00.
+
+Raises `ValueError` on an unknown unit or a non-positive `amount`, `TypeError` if `value` isn't a `datetime` or `time`.
+
 ## `wait_until(date=None, time=None, day_offset=0, timezone=None)`
 
 Sleeps until a wall-clock target. Arguments match `to_datetime`. If the target is already past, it rolls forward one day.

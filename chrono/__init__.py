@@ -5,6 +5,7 @@ from .time_parser import to_datetime, TimeParseError
 from .timezone_converter import to_timezone
 from .shift_time import shift_time
 from .is_past import is_past
+from .roundup import roundup
 
 __all__ = [
     "Stopwatch",
@@ -15,4 +16,5 @@ __all__ = [
     "is_past",
     "to_timezone",
     "shift_time",
+    "roundup",
 ]

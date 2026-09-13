@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 def is_past(value: datetime) -> bool:
     """Return whether `value` is before the current time.
 
