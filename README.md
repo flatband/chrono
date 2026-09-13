@@ -40,6 +40,23 @@ tokyo = to_timezone(berlin, "Asia/Tokyo")   # same moment, 21:00 Tokyo
 
 Naive input is rejected — there's no way to know which zone it's already in. Attach one with `to_datetime` first.
 
+## `shift_time(value, amount, unit)`
+
+Shifts a datetime by a signed amount. Negative `amount` moves earlier.
+
+```python
+from chrono import to_datetime, shift_time
+
+now = to_datetime(time="now", timezone="Europe/Berlin")
+shift_time(now, 5, "m")     # 5 minutes later
+shift_time(now, -5, "m")    # 5 minutes earlier
+shift_time(now, 2, "h")     # 2 hours later
+```
+
+`unit` is one of `"s"`, `"m"`, `"h"` (fixed duration — exactly that much real time later/earlier) or `"d"` (calendar day — same wall-clock time `amount` days away, like `to_datetime`'s `day_offset`). `"d"` only accepts whole numbers and can cross a DST change without the wall-clock time drifting; `"s"`/`"m"`/`"h"` add real elapsed time and can drift across one.
+
+Raises `ValueError` on an unknown unit or a fractional `"d"` amount, `TypeError` if `value` isn't a `datetime`.
+
 ## `wait_until(date=None, time=None, day_offset=0, timezone=None)`
 
 Sleeps until a wall-clock target. Arguments match `to_datetime`. If the target is already past, it rolls forward one day.

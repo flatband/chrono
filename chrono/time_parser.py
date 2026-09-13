@@ -4,6 +4,7 @@
 import datetime as _dt
 from logging import getLogger
 from zoneinfo import ZoneInfo
+from shift_time import shift_time
 
 logger = getLogger(__name__)
 
@@ -15,7 +16,7 @@ class TimeParseError(ValueError):
     """Raised when an input can't be interpreted."""
 
 
-def to_datetime(date=None, time=None, day_offset: int = 0, timezone=None):
+def to_datetime(date=None, time=None, timezone=None):
     """Return an aware datetime.
 
     date       -- "YYYY-MM-DD" or "DD.MM.YYYY", a date object, or one of
@@ -36,9 +37,6 @@ def to_datetime(date=None, time=None, day_offset: int = 0, timezone=None):
 
     date = _parse_date(date, now)
     time = _parse_time(time, now)
-
-    if day_offset:
-        date += _dt.timedelta(days=day_offset)
 
     return _dt.datetime.combine(date, time, tzinfo=tz)
 
@@ -98,7 +96,7 @@ def _parse_time(value, now):
         if len(parts) > 3:
             raise TimeParseError(f"Too many parts in time: {value!r}")
         try:
-            return _build(int(p) for p in parts)
+            return _build_time(int(p) for p in parts)
         except ValueError as e:
             raise TimeParseError(f"Unrecognized time format: {value!r}") from e
     # Time is dict {"hour", "minute", "second"}
@@ -106,19 +104,19 @@ def _parse_time(value, now):
         unknown = set(value) - {"hour", "minute", "second"}
         if unknown:
             raise TimeParseError(f"Unknown time keys: {sorted(unknown)}")
-        return _build(
+        return _build_time(
             (value.get("hour", 0), value.get("minute", 0), value.get("second", 0))
         )
     # Time is tuple (hour, minute, second)
     elif isinstance(value, (tuple, list)):
         if not 1 <= len(value) <= 3:
             raise TimeParseError("Time tuple takes 1-3 items: (hour, minute, second).")
-        return _build(value)
+        return _build_time(value)
     else:
         raise TimeParseError(f"Can't interpret {value!r} as a time.")
 
 
-def _build(parts):
+def _build_time(parts):
     hour, minute, second = (list(parts) + [0, 0, 0])[:3]
     try:
         return _dt.time(int(hour), int(minute), int(second))
